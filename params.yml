@@ -1,0 +1,29 @@
+half_precision: False
+device: cuda
+
+architecture:
+  name: Mask-RCNN
+
+data:
+  sample_submission: data/sample_submission.csv/
+  train_csv: data/train.csv
+  train_path: data/train
+  test_path: data/test
+
+model:
+  exp_name: as_in_tutorial
+  save_path: experiments
+
+training:
+  epochs: 100
+  save_step: 10
+  shuffle: true
+  num_workers: 12
+  batch_size: 10
+  autoresume: true
+
+optimizer:
+  type: SGD
+  lr: !!float 5e-3
+  weight_decay: !!float 5e-4
+  momentum: 0.9
