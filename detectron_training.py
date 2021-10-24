@@ -6,16 +6,20 @@ import matplotlib.pyplot as plt
 # import some common detectron2 utilities
 from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor, DefaultTrainer
+from detector_trainer import Trainer
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer, ColorMode
-from detectron2.data import MetadataCatalog, DatasetCatalog
+from detectron2.data import MetadataCatalog, DatasetCatalog, build_detection_train_loader
 from detectron2.data.datasets import register_coco_instances
+import detectron2.data.transforms as T
+from detectron2.data import DatasetMapper
 
 
 def train():
     # TRAIN
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
-    trainer = DefaultTrainer(cfg)
+    trainer = Trainer(cfg)
+    # trainer = DefaultTrainer(cfg)
     trainer.resume_or_load(resume=False)
     trainer.train()
 
@@ -52,9 +56,9 @@ if __name__ == '__main__':
     cfg = get_cfg()
     cfg.INPUT.MASK_FORMAT = 'bitmask'
     register_coco_instances('sartorius_train', {},
-                            'data/annotations_train_4X.json.json', dataDir)
+                            'data/train.json', dataDir)
     register_coco_instances('sartorius_val', {},
-                            'data/annotations_val_4X.json', dataDir)
+                            'data/annotations_val.json', dataDir)
     metadata = MetadataCatalog.get('sartorius_train')
     train_ds = DatasetCatalog.get('sartorius_train')
 
@@ -73,11 +77,11 @@ if __name__ == '__main__':
     cfg.DATALOADER.NUM_WORKERS = 12
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(
         "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")  # Let training initialize from model zoo
-    cfg.SOLVER.IMS_PER_BATCH = 10
-    cfg.SOLVER.BASE_LR = 0.0005
-    cfg.SOLVER.MAX_ITER = 2000
+    cfg.SOLVER.IMS_PER_BATCH = 12
+    cfg.SOLVER.BASE_LR = 0.00025
+    cfg.SOLVER.MAX_ITER = 4000
     cfg.SOLVER.STEPS = []
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3
     cfg.SOLVER.AMP.ENABLED = True
     train()
