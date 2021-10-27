@@ -4,6 +4,7 @@ import os
 import numpy as np
 from cell_utils import analyze_sample
 from pycocotools.coco import COCO
+from augmentations import get_augmentations
 
 
 class CellDataset(Dataset):
@@ -44,6 +45,18 @@ class CellDataset(Dataset):
             areas.append(ann['area'])
             iscrowd.append(ann['iscrowd'])
 
+
+        if self.transforms is not None:
+            transformed = self.transforms(
+                image=img,
+                masks=masks,
+                bboxes=boxes,
+                bbox_classes=labels
+            )
+            img = transformed['image']
+            masks = transformed['masks']
+            boxes = [[round(el) for el in box] for box in transformed['bboxes'] ]
+
         # Required target for the Mask R-CNN
         target = {
             'boxes': boxes,
@@ -53,14 +66,13 @@ class CellDataset(Dataset):
             'area': areas,
             'iscrowd': iscrowd
         }
-        if self.transforms is not None:
-            img, target = self.transforms(img, target)
 
         return img, target
 
 
 if __name__ == '__main__':
-    dataset = CellDataset('../data', '../data/annotations_train.json')
+    trans = get_augmentations()
+    dataset = CellDataset('../data', '../data/annotations_train_4X.json', transforms=trans)
     dataloader = DataLoader(dataset)
     for img, target in dataset:
         analyze_sample(img, target)
