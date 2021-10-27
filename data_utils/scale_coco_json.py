@@ -3,7 +3,7 @@ from rle_int_encoding import scale_up_rle_enc
 from tqdm import tqdm
 
 if __name__ == '__main__':
-    path = '../data/annotations_val.json'
+    path = '../data/train.json'
     coco_info = json.load(open(path, 'r'))
     scale = 4
 
@@ -31,9 +31,11 @@ if __name__ == '__main__':
                     scale=scale
                 ),
                 "size": [i*scale for i in ann['segmentation']['size']]
-            }
+            },
+            "bbox": [i*scale for i in ann['bbox']],
+            "area": ann['area']*(scale**2)
         }
         new_anns.append(new_ann)
     coco_info['annotations'] = new_anns
 
-    json.dump(coco_info, open('../data/annotations_val_4X.json', 'w'))
+    json.dump(coco_info, open('../data/train_4X.json', 'w'))
