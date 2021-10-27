@@ -5,13 +5,14 @@ architecture:
   name: Mask-RCNN
 
 data:
-  sample_submission: data/sample_submission.csv/
-  train_csv: data/train.csv
+  sample_submission: data/sample_submission.csv
+  train_json: data/annotations_train.json
+  val_json: data/annotations_val.json
   train_path: data/train
   test_path: data/test
 
 model:
-  exp_name: as_in_tutorial
+  exp_name: peller
   save_path: experiments
 
 training:

@@ -1,5 +1,20 @@
 import numpy as np
-from .segmentation_transforms import Normalize, Compose, RandomHorizontalFlip, ToTensor, MaskedGaussianBlur, MaskedRandomBrightnessContrast
+from segmentation_transforms import Normalize, Compose, HorizontalFlip, ToTensor, MaskedGaussianBlur, MaskedRandomBrightnessContrast
+import matplotlib.pyplot as plt
+
+
+def analyze_sample(img, targets):
+    plt.imshow(img)
+    plt.title('Image')
+    plt.show()
+
+    masks = np.zeros((img.shape[0], img.shape[1]))
+    for label, mask in zip(targets['labels'], targets['masks']):
+        masks = np.logical_or(masks, mask)
+    plt.imshow(img)
+    plt.imshow(masks, alpha=0.3)
+    plt.title('Ground truth')
+    plt.show()
 
 
 def rle_decode(mask_rle, shape, color=1):
