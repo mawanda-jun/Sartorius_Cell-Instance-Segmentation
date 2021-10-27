@@ -1,6 +1,8 @@
 import detectron2.data.transforms as T
 from detectron2.data import DatasetMapper, build_detection_train_loader
 from detectron2.engine import DefaultTrainer
+from detectron2.evaluation import COCOEvaluator
+import os
 
 
 class Trainer(DefaultTrainer):
@@ -15,10 +17,18 @@ class Trainer(DefaultTrainer):
     def build_train_loader(cls, cfg):
         if "GeneralizedRCNN" in cfg.MODEL.META_ARCHITECTURE:
             mapper = DatasetMapper(cfg, is_train=True, augmentations=[
-                # T.RandomCrop(crop_type='absolute', crop_size=(512, 512)),
+                T.RandomCrop('absolute', crop_size=(520, 704)),
+                T.ResizeShortestEdge(short_edge_length=[640, 672, 704, 736, 768, 800], max_size=1333,
+                                   sample_style='choice'),
                 T.RandomFlip(prob=0.5, horizontal=True, vertical=False),
                 T.RandomFlip(prob=0.5, horizontal=False, vertical=True)
             ])
         else:
             mapper = None
         return build_detection_train_loader(cfg, mapper=mapper)
+
+    @classmethod
+    def build_evaluator(cls, cfg, dataset_name, output_folder=None):
+        if output_folder is None:
+            output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
+        return COCOEvaluator(dataset_name, cfg, True, output_folder)
