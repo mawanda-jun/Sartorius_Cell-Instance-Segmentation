@@ -41,18 +41,16 @@ def first_visualization():
     pass  # STOP DEBUG HERE TO SEE PLOT!
 
 
-def try_SR_image():
+def try_SR_image(image_id, scale):
     root = '../data'
     annFile = Path(root, 'train.json')
     coco = COCO(annFile)
     # imgIds = coco.getImgIds()
     # imgs = coco.loadImgs(imgIds[-3:])
-    scale = 4
-    SR_image_ID = '0df9d6419078'
     _, ax = plt.subplots(1, 2, figsize=(40, 15))
 
-    I = io.imread(SR_image_ID + ".png")
-    annIds = coco.getAnnIds(imgIds=[SR_image_ID])
+    I = io.imread(image_id + ".png")
+    annIds = coco.getAnnIds(imgIds=[image_id])
     anns = coco.loadAnns(annIds)
     new_anns = []
     for ann in anns:
@@ -88,19 +86,19 @@ def try_SR_image():
 
 
 if __name__ == '__main__':
-    encs = [
-        [357830, 2, 517, 7, 513, 11, 509, 14, 507, 17, 502, 21, 500, 21, 500, 22, 500, 22, 499, 27, 494, 28, 494, 27,
-         494, 26, 496, 25, 498, 22, 502, 11, 422]
+    # encs = [
+    #     [357830, 2, 517, 7, 513, 11, 509, 14, 507, 17, 502, 21, 500, 21, 500, 22, 500, 22, 499, 27, 494, 28, 494, 27,
+    #      494, 26, 496, 25, 498, 22, 502, 11, 422]
         # [14, 2, 6, 4, 6, 2, 22],
         # [16, 2, 1, 2, 1, 2, 0, 2, 1, 2, 1, 2, 10, 2, 1, 2, 1],
         # [19, 5, 3, 5, 8],
         # [0, 1, 6, 1, 0, 1, 6, 1, 0, 1, 6, 1],
         # [16, 2, 3, 3, 2, 3, 3, 8]
-    ]
-    width = 704
-    width = 8
-    height = 520
-    scale = 2
+    # ]
+    # width = 704
+    # width = 8
+    # height = 520
+    # scale = 4
     # print(scale_rle_enc(encs[0], 8, scale))
     # for enc in encs:
     #     test_rle_to_matrix(enc, width)
@@ -114,5 +112,9 @@ if __name__ == '__main__':
     # width=9)
     # print(scale_rle_enc([6, 6, 1, 2, 4, 1, 1, 2, 7], 6, 4))
     # first_visualization()
-    try_SR_image()
+
+    # SR_image_ID = '0df9d6419078'
+    scale = 4
+    image_id = '11c2e4fcac6d'
+    try_SR_image(image_id, scale)
 
