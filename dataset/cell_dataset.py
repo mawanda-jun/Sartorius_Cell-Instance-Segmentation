@@ -2,9 +2,8 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import os
 import numpy as np
-from cell_utils import analyze_sample, collate_fn
+from dataset import analyze_sample, collate_fn
 from pycocotools.coco import COCO
-from augmentations import get_augmentations
 
 
 class CellDataset(Dataset):
@@ -12,7 +11,7 @@ class CellDataset(Dataset):
         self.transforms = transforms
 
         self.data_dir = data_dir
-        self.coco = COCO(coco_path)
+        self.coco = COCO(os.path.join(data_dir, coco_path))
         self.img_ids = self.coco.getImgIds()
         pass
 
@@ -77,9 +76,10 @@ class CellDataset(Dataset):
 if __name__ == '__main__':
     from tqdm import tqdm
     import matplotlib.pyplot as plt
+    from augmentations import get_augmentations
     trans = get_augmentations()
     # dataset = CellDataset('../data', '../data/train.json', transforms=trans)
-    dataset = CellDataset('../data', '../data/train.json', transforms=trans)
+    dataset = CellDataset('../data', 'train.json', transforms=trans)
     dataloader = DataLoader(
         dataset,
         num_workers=0,

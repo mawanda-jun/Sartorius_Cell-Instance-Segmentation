@@ -27,6 +27,9 @@ class Trainer:
         else:
             raise NotImplementedError(f"Optimizer {opt['optimizer']['type']} not implemented yet!")
 
+        # DEFINE SCHEDULER
+        self.lr_scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
+
         self.opt = opt
 
     def save(self, epoch):
@@ -64,7 +67,12 @@ class Trainer:
             old_epoch = self.resume()
 
         for epoch in range(old_epoch + 1, self.opt['training']['epochs'] + 1):
-            self.arch.train_batch(loader, self.optimizer)
+            # UPDATE PARAMS FOR ONE EPOCH
+            self.arch.update_params(loader, self.optimizer)
+
+            # TRIGGER EPOCH LR SCHEDULER
+            self.lr_scheduler.step()
+
             if epoch % self.opt['training']['save_step'] == 0:
                 self.save(epoch)
             print(f"Epoch {epoch}\tLoss: {self.arch.epoch_loss:.4f}\tMask loss: {self.arch.epoch_mask_loss:.4f}")

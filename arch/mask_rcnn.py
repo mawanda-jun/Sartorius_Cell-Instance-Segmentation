@@ -21,13 +21,13 @@ class CellModel(BaseNetwork):
         in_features = self.model.roi_heads.box_predictor.cls_score.in_features
 
         # Replace the pre-trained head with a new one
-        self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, 2)
+        self.model.roi_heads.box_predictor = FastRCNNPredictor(in_features, opt['architecture']['num_classes'] + 1)
 
         # Now get the number of input features for the mask classifier
         in_features_mask = self.model.roi_heads.mask_predictor.conv5_mask.in_channels
         hidden_layer = 256
         # and replace the mask predictor with a new one
-        self.model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, 2)
+        self.model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, opt['architecture']['num_classes'] + 1)
 
     def forward(self, images, targets):
         return self.model(images, targets)

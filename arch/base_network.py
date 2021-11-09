@@ -17,7 +17,13 @@ class BaseNetwork(torch.nn.Module):
 
         self.opt = opt
 
-    def train_batch(self, loader, optimizer):
+    def __norm(self, img):
+        img = torch.tensor(img, device=self.device)
+        img /= 255.
+        img = (img - self.mean) / self.std
+        return img
+
+    def update_params(self, loader, optimizer):
         self.train()
         epoch_loss = 0.0
         epoch_mask_loss = 0.0
@@ -25,7 +31,7 @@ class BaseNetwork(torch.nn.Module):
         for images, targets in tqdm_loader:
             optimizer.zero_grad()
 
-            images = list((image.to(self.device) - self.mean)/self.std for image in images)
+            images = [self.__norm(image) for image in images]
             targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
 
             if self.opt['half_precision']:

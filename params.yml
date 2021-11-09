@@ -4,13 +4,13 @@ device: cuda
 architecture:
   name: Mask-RCNN
   box_detections_per_img: 540
+  num_classes: 3
 
 data:
-  sample_submission: data/sample_submission.csv
-  train_json: data/annotations_train.json
-  val_json: data/annotations_val.json
-  train_path: data/train
-  test_path: data/test
+  sample_submission: sample_submission.csv
+  train_json: annotations_train.json
+  val_json: annotations_val.json
+  data_path: data/
   mask_threshold:
     1: 0.55
     2: 0.75
@@ -28,7 +28,7 @@ training:
   epochs: 100
   save_step: 10
   shuffle: true
-  num_workers: 12
+  num_workers: 0
   batch_size: 10
   autoresume: true
 

@@ -1,7 +1,7 @@
 from utils import fix_all_seeds
 import yaml
 from model import Trainer
-from dataset import CellDataset, get_transform, collate_fn
+from dataset import CellDataset, collate_fn, get_augmentations
 from torch.utils.data import DataLoader
 
 
@@ -17,23 +17,16 @@ if __name__ == '__main__':
             print(exc)
     trainer = Trainer(opt)
 
-    dataset = CellDataset(
-        image_dir=opt['data']['train_path'],
-        df_path=opt['data']['train_csv'],
-        height=704,
-        width=520,
-        transforms=get_transform(train=True)
+    train_set = CellDataset(
+        data_dir=opt['data']['data_path'],
+        coco_path=opt['data']['train_json'],
+        transforms=get_augmentations(is_training=True)
     )
     dataloader = DataLoader(
-        dataset,
+        train_set,
         batch_size=opt['training']['batch_size'],
         shuffle=opt['training']['shuffle'],
         num_workers=opt['training']['num_workers'],
         collate_fn=collate_fn
     )
     trainer.fit(dataloader)
-
-
-
-
-
