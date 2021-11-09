@@ -24,6 +24,8 @@ class Trainer:
                 momentum=opt['optimizer']['momentum'],
                 weight_decay=opt['optimizer']['weight_decay']
             )
+        else:
+            raise NotImplementedError(f"Optimizer {opt['optimizer']['type']} not implemented yet!")
 
         self.opt = opt
 
