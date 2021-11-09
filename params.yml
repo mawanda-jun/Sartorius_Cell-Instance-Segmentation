@@ -3,6 +3,7 @@ device: cuda
 
 architecture:
   name: Mask-RCNN
+  box_detections_per_img: 540
 
 data:
   sample_submission: data/sample_submission.csv
@@ -10,6 +11,14 @@ data:
   val_json: data/annotations_val.json
   train_path: data/train
   test_path: data/test
+  mask_threshold:
+    1: 0.55
+    2: 0.75
+    3: 0.6
+  min_score:
+    1: 0.55
+    2: 0.75
+    3: 0.5
 
 model:
   exp_name: peller

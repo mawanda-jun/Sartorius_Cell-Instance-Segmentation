@@ -54,6 +54,7 @@ def reconstruct_int_rle(int_rle):
     new_rle_enc = []
     empty = 0
     mask = 0
+    first_line = True
     for line in int_rle:
         for idx in range(len(line)):
             if idx % 2 == 0:  # odd position, empty
@@ -62,6 +63,9 @@ def reconstruct_int_rle(int_rle):
                     mask = 0
                 empty += line[idx]
             else:  # even position, mask
+                if first_line and empty == 0:
+                    new_rle_enc.append(empty)
+                    first_line = False
                 if empty > 0 and line[idx] > 0:
                     new_rle_enc.append(empty)
                     empty = 0

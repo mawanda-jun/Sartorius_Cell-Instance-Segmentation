@@ -111,17 +111,17 @@ if __name__ == '__main__':
     cfg.DATASETS.TRAIN = ("sartorius_train_4X",)
     cfg.DATASETS.TEST = ("sartorius_val_4X",)
     # cfg.DATASETS.TEST = ()
-    cfg.DATALOADER.NUM_WORKERS = 0
+    cfg.DATALOADER.NUM_WORKERS = 16
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(
         "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")  # Let training initialize from model zoo
     cfg.SOLVER.IMS_PER_BATCH = 20
     cfg.TEST.EVAL_PERIOD = cfg.SOLVER.IMS_PER_BATCH*5
-    cfg.SOLVER.BASE_LR = 1e-5
+    cfg.SOLVER.BASE_LR = 1e-4
     cfg.SOLVER.MAX_ITER = 12000
     cfg.SOLVER.STEPS = []
     cfg.SOLVER.CHECKPOINT_PERIOD = 200
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3
-    cfg.SOLVER.AMP.ENABLED = True
+    cfg.SOLVER.AMP.ENABLED = False
     train()
     test(scale=4)

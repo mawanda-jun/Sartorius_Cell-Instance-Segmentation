@@ -13,8 +13,10 @@ class CellModel(BaseNetwork):
         # !mkdir - p / root /.cache / torch / hub / checkpoints /
         # !cp.. / input / cocopre / maskrcnn_resnet50_fpn_coco - bf2d0c1e.pth / root /.cache / torch / hub / checkpoints / maskrcnn_resnet50_fpn_coco - bf2d0c1e.pth
 
-        self.model = maskrcnn_resnet50_fpn(pretrained=True)
-
+        self.model = maskrcnn_resnet50_fpn(
+            pretrained=True,
+            box_detections_per_img=opt['architecture']['box_detections_per_img']
+        )
         # Get the number of input features for the classifier
         in_features = self.model.roi_heads.box_predictor.cls_score.in_features
 

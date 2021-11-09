@@ -53,7 +53,7 @@ def try_SR_image(image_id, scale):
     annIds = coco.getAnnIds(imgIds=[image_id])
     anns = coco.loadAnns(annIds)
     new_anns = []
-    for ann in anns:
+    for i, ann in enumerate(anns):
         new_ann = {
             **ann,
             "segmentation": {
@@ -62,20 +62,20 @@ def try_SR_image(image_id, scale):
                     width=ann['segmentation']['size'][0],
                     scale=scale
                 ),
-                "size": [i*scale for i in ann['segmentation']['size']]
+                "size": [i * scale for i in ann['segmentation']['size']]
             },
             "bbox": [
                 # ann['bbox'][0]*(scale-1)+1,
                 # ann['bbox'][1]*(scale-1)+1,
                 # ann['bbox'][2]*scale,
                 # ann['bbox'][3]*scale
-                i*scale for i in ann['bbox']
+                i * scale for i in ann['bbox']
             ],
             'area': ann['area'] * scale ** 2
         }
         new_anns.append(new_ann)
     anns = new_anns
-        # test_rle_to_matrix(ann['segmentation']['counts'], width=ann['segmentation']['size'][1])
+    # test_rle_to_matrix(ann['segmentation']['counts'], width=ann['segmentation']['size'][1])
 
     ax[0].imshow(I)
     ax[1].imshow(I)
@@ -89,15 +89,15 @@ if __name__ == '__main__':
     # encs = [
     #     [357830, 2, 517, 7, 513, 11, 509, 14, 507, 17, 502, 21, 500, 21, 500, 22, 500, 22, 499, 27, 494, 28, 494, 27,
     #      494, 26, 496, 25, 498, 22, 502, 11, 422]
-        # [14, 2, 6, 4, 6, 2, 22],
-        # [16, 2, 1, 2, 1, 2, 0, 2, 1, 2, 1, 2, 10, 2, 1, 2, 1],
-        # [19, 5, 3, 5, 8],
-        # [0, 1, 6, 1, 0, 1, 6, 1, 0, 1, 6, 1],
-        # [16, 2, 3, 3, 2, 3, 3, 8]
+    # [14, 2, 6, 4, 6, 2, 22],
+    # [16, 2, 1, 2, 1, 2, 0, 2, 1, 2, 1, 2, 10, 2, 1, 2, 1],
+    # [19, 5, 3, 5, 8],
+    # [0, 1, 6, 1, 0, 1, 6, 1, 0, 1, 6, 1],
+    # [16, 2, 3, 3, 2, 3, 3, 8]
     # ]
-    # width = 704
+    width = 704
     # width = 8
-    # height = 520
+    height = 520
     # scale = 4
     # print(scale_rle_enc(encs[0], 8, scale))
     # for enc in encs:
@@ -117,4 +117,11 @@ if __name__ == '__main__':
     scale = 4
     image_id = '11c2e4fcac6d'
     try_SR_image(image_id, scale)
-
+    # original_enc = [0, 18, 502, 22, 498, 23, 497, 23, 497, 24, 496, 24, 496, 25, 495, 25, 495, 26, 494, 27, 493, 29,
+    #                 491, 30, 490, 31, 489, 33, 487, 34, 486, 35, 485, 36, 484, 38, 4, 1, 477, 39, 3, 1, 477, 40, 2, 2,
+    #                 476, 41, 1, 3, 475, 45, 475, 46, 474, 42, 1, 4, 473, 42, 3, 2, 473, 8, 2, 32, 4, 2, 472, 6, 6, 30,
+    #                 6, 1, 471, 4, 10, 28, 478, 4, 12, 26, 478, 3, 15, 24, 478, 2, 18, 22, 478, 2, 20, 20, 478, 1, 23,
+    #                 18, 504, 16, 506, 14, 508, 12, 510, 10, 512, 8, 514, 6, 516, 4, 518, 2, 520, 1, 344717]
+    # scaled_enc = scale_up_rle_enc(original_enc, height, scale)
+    # print(len(scaled_enc))
+    # print(scaled_enc)

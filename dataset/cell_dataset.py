@@ -78,13 +78,14 @@ if __name__ == '__main__':
     from tqdm import tqdm
     import matplotlib.pyplot as plt
     trans = get_augmentations()
-    dataset = CellDataset('../data', '../data/train_4X.json', transforms=trans)
+    # dataset = CellDataset('../data', '../data/train.json', transforms=trans)
+    dataset = CellDataset('../data', '../data/train.json', transforms=trans)
     dataloader = DataLoader(
         dataset,
         num_workers=0,
         collate_fn=collate_fn
     )
-    img, target = dataset['52f65c9194c0']
+    img, target = dataset[39]
     analyze_sample(img, target)
     # box_areas = []
     # min_bounding_box = 10000000000
