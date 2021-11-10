@@ -1,25 +1,23 @@
 import torch
+from arch import CellModel
 import os
 import shutil
-from arch import get_model, BaseNetwork
 
 
 class Trainer:
     def __init__(self, opt):
         # DEFINE MODEL
         if opt['architecture']['name'] == "Mask-RCNN":
-            model = get_model(opt)
+            self.arch = CellModel(opt)
         else:
             raise NotImplementedError(f"Model {opt['architecture']['name']} not implemented yet!")
-
-        model.to(opt['device'])
-        self.arch = BaseNetwork(model, opt)
+        self.arch.to(torch.device(opt['device']))
 
         # DEFINE LOSS
         # Loss is defined inside CellModel model!
 
         # DEFINE OPTIMIZER
-        params = [p for p in self.arch.model.parameters() if p.requires_grad]
+        params = [p for p in self.arch.parameters() if p.requires_grad]
         if opt['optimizer']['type'] == "SGD":
             self.optimizer = torch.optim.SGD(
                 params,
