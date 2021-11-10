@@ -1,6 +1,6 @@
 import torch
 from tqdm import tqdm
-from copy import deepcopy
+import numpy as np
 
 
 class BaseNetwork(torch.nn.Module):
@@ -12,16 +12,7 @@ class BaseNetwork(torch.nn.Module):
         if opt['half_precision']:
             self.scaler = torch.cuda.amp.GradScaler()
 
-        self.mean = torch.tensor([0.485, 0.456, 0.406])[:, None, None].to(self.device)
-        self.std = torch.tensor([0.229, 0.224, 0.225])[:, None, None].to(self.device)
-
         self.opt = opt
-
-    def __norm(self, img):
-        img = torch.tensor(img, device=self.device)
-        img /= 255.
-        img = (img - self.mean) / self.std
-        return img
 
     def update_params(self, loader, optimizer):
         self.train()
@@ -31,8 +22,10 @@ class BaseNetwork(torch.nn.Module):
         for images, targets in tqdm_loader:
             optimizer.zero_grad()
 
-            images = [self.__norm(image) for image in images]
-            targets = [{k: v.to(self.device) for k, v in t.items()} for t in targets]
+            # Images are already normalized inside mask rcnn network!!
+            images = [image.to(self.device).float() / 255. for image in images]
+
+            targets = [{k: v.to(self.device) for k, v in t.items() if isinstance(v, torch.Tensor)} for t in targets]
 
             if self.opt['half_precision']:
                 with torch.cuda.amp.autocast():

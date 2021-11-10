@@ -4,6 +4,8 @@ import os
 import numpy as np
 from dataset import analyze_sample, collate_fn
 from pycocotools.coco import COCO
+import torch
+import numpy as np
 
 
 class CellDataset(Dataset):
@@ -54,11 +56,16 @@ class CellDataset(Dataset):
                 image=img,
                 masks=masks,
                 bboxes=boxes,
-                bbox_classes=labels
+                bbox_classes=labels,
             )
             img = transformed['image']
             masks = transformed['masks']
             boxes = [[round(el) for el in box] for box in transformed['bboxes']]
+
+        img = torch.tensor(img, dtype=torch.uint8).unsqueeze(0)
+        boxes = torch.tensor(boxes).float()
+        labels = torch.tensor(labels, dtype=torch.int64)
+        masks = torch.tensor(np.array(masks), dtype=torch.uint8)
 
         # Required target for the Mask R-CNN
         target = {
@@ -85,7 +92,7 @@ if __name__ == '__main__':
         num_workers=0,
         collate_fn=collate_fn
     )
-    img, target = dataset[39]
+    img, target = dataset['56b8cad4f8e7']
     analyze_sample(img, target)
     # box_areas = []
     # min_bounding_box = 10000000000

@@ -21,14 +21,14 @@ data:
     3: 0.5
 
 model:
-  exp_name: peller
+  exp_name: exp_1_original_dataset
   save_path: experiments
 
 training:
   epochs: 100
   save_step: 10
   shuffle: true
-  num_workers: 0
+  num_workers: 4
   batch_size: 10
   autoresume: true
 
