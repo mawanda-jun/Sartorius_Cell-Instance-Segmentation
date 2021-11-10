@@ -9,7 +9,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 class TorchBoard:
     def __init__(self, minibatch_interval: int = 50,
-                 log_path: Path = Path('data/tensorboards'),
+                 log_path: Path = Path('tb_checkpoints/tensorboards'),
                  log_name: str = None):
         # If a log name is not specified, creates a new event folder each time a TensorBoard is created.
         if not log_name:
