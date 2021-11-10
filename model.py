@@ -5,6 +5,7 @@ import torch
 
 from arch import CellModel
 from utils.torch_board import TorchBoard
+from pathlib import Path
 
 
 class Trainer:
@@ -44,12 +45,14 @@ class Trainer:
             self.lr_scheduler = None
 
         self.opt = opt
-        self._torch_board = TorchBoard(**tensorboard_args)
 
         # Save configuration
         self.save_dir = os.path.join(self.opt['model']['save_path'], self.opt['model']['exp_name'])
         os.makedirs(self.save_dir, exist_ok=True)
         shutil.copy('params.yml', os.path.join(self.save_dir, 'params.yml'))
+
+        # Instantiate tensorboard
+        self._torch_board = TorchBoard(log_path=Path(os.path.join(self.save_dir, 'tensorboard')), **tensorboard_args)
 
     def save(self, epoch):
         checkpoint = {

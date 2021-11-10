@@ -21,7 +21,7 @@ data:
     3: 0.5
 
 model:
-  exp_name: exp_3_like_online
+  exp_name: exp_4_like_online
   save_path: experiments
 
 training:
@@ -29,7 +29,7 @@ training:
   save_step: 10
   shuffle: true
   num_workers: 4
-  batch_size: 2
+  batch_size: 8
   autoresume: true
 
 optimizer:
