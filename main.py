@@ -5,7 +5,7 @@ from dataset import CellDataset, collate_fn, get_augmentations
 from torch.utils.data import DataLoader
 
 
-if __name__ == '__main__':
+def main():
     fix_all_seeds(42)
 
     # Read configuration file
@@ -42,3 +42,7 @@ if __name__ == '__main__':
         collate_fn=collate_fn
     )
     trainer.fit(train_loader, val_loader)
+
+
+if __name__ == "__main__":
+    main()
