@@ -1,6 +1,5 @@
 import torch
 from tqdm import tqdm
-import numpy as np
 
 
 class BaseNetwork(torch.nn.Module):
@@ -28,7 +27,7 @@ class BaseNetwork(torch.nn.Module):
             targets = [{k: v.to(self.device) for k, v in t.items() if isinstance(v, torch.Tensor)} for t in targets]
 
             if self.opt['half_precision']:
-                with torch.cuda.amp.autocast():
+                with torch.cuda.amp.autocast(enabled=self.opt['half_precision']):
                     loss_dict = self.forward(images, targets)
                     losses = sum(loss for loss in loss_dict.values())
                     self.scaler.scale(losses).backward()
