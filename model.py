@@ -60,7 +60,7 @@ class Trainer:
         else:
             return 0
 
-    def fit(self, loader):
+    def fit(self, train_loader, val_loader):
         old_epoch = 0
         # Resume if autoresume is active
         if self.opt['training']['autoresume']:
@@ -68,11 +68,11 @@ class Trainer:
 
         for epoch in range(old_epoch + 1, self.opt['training']['epochs'] + 1):
             # UPDATE PARAMS FOR ONE EPOCH
-            self.arch.update_params(loader, self.optimizer)
-
+            self.arch.update_params(train_loader, self.optimizer)
+            self.arch.validate(val_loader)
             # TRIGGER EPOCH LR SCHEDULER
             self.lr_scheduler.step()
 
             if epoch % self.opt['training']['save_step'] == 0:
                 self.save(epoch)
-            print(f"Epoch {epoch}\tLoss: {self.arch.epoch_loss:.4f}\tMask loss: {self.arch.epoch_mask_loss:.4f}")
+            print(f"Epoch {epoch}\tLoss/Val: {self.arch.epoch_loss:.4f}/{self.arch.val_epoch_loss:.4f}\tMask loss/val: {self.arch.epoch_mask_loss:.4f}/{self.arch.val_epoch_mask_loss:.4f}")

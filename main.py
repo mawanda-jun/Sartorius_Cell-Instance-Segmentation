@@ -22,11 +22,23 @@ if __name__ == '__main__':
         coco_path=opt['data']['train_json'],
         transforms=get_augmentations(is_training=True)
     )
-    dataloader = DataLoader(
+    val_set = CellDataset(
+        data_dir=opt['data']['data_path'],
+        coco_path=opt['data']['val_json'],
+        transforms=get_augmentations(is_training=False)
+    )
+    train_loader = DataLoader(
         train_set,
         batch_size=opt['training']['batch_size'],
         shuffle=opt['training']['shuffle'],
         num_workers=opt['training']['num_workers'],
         collate_fn=collate_fn
     )
-    trainer.fit(dataloader)
+    val_loader = DataLoader(
+        val_set,
+        batch_size=opt['training']['batch_size'],
+        shuffle=opt['training']['shuffle'],
+        num_workers=opt['training']['num_workers'],
+        collate_fn=collate_fn
+    )
+    trainer.fit(train_loader, val_loader)

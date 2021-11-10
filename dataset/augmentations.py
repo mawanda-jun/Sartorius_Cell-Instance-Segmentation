@@ -1,5 +1,6 @@
 import albumentations as A
 
+
 def get_augmentations(is_training=True):
     if is_training:
         transforms = [
@@ -8,9 +9,7 @@ def get_augmentations(is_training=True):
             A.VerticalFlip(p=0.5)
         ]
     else:
-        transforms = [
-            # TODO: prepare transforms for validation/test!!
-        ]
+        transforms = []
     return A.Compose(
         transforms,
         bbox_params=A.BboxParams(
