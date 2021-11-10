@@ -1,5 +1,5 @@
 half_precision: False
-device: cuda
+device: cuda:0
 
 architecture:
   name: Mask-RCNN
@@ -21,7 +21,7 @@ data:
     3: 0.5
 
 model:
-  exp_name: exp_1_original_dataset
+  exp_name: exp_2_adam
   save_path: experiments
 
 training:
@@ -33,7 +33,7 @@ training:
   autoresume: true
 
 optimizer:
-  type: SGD
-  lr: !!float 5e-3
-  weight_decay: !!float 5e-4
+  type: adam
+  lr: !!float 1e-5
+  weight_decay: 0.0
   momentum: 0.9

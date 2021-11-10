@@ -1,11 +1,10 @@
 import torch
 from tqdm import tqdm
-import numpy as np
 
 
-class BaseNetwork(torch.nn.Module):
-    def __init__(self, opt):
-        super().__init__()
+class BaseNetwork:
+    def __init__(self, model, opt):
+        self.model = model
 
         self.device = torch.device(opt['device'])
 
@@ -15,7 +14,7 @@ class BaseNetwork(torch.nn.Module):
         self.opt = opt
 
     def update_params(self, loader, optimizer):
-        self.train()
+        self.model.train()
         epoch_loss = 0.0
         epoch_mask_loss = 0.0
         tqdm_loader = tqdm(loader)
@@ -28,14 +27,14 @@ class BaseNetwork(torch.nn.Module):
             targets = [{k: v.to(self.device) for k, v in t.items() if isinstance(v, torch.Tensor)} for t in targets]
 
             if self.opt['half_precision']:
-                with torch.cuda.amp.autocast():
-                    loss_dict = self.forward(images, targets)
+                with torch.cuda.amp.autocast(enabled=self.opt['half_precision']):
+                    loss_dict = self.model(images, targets)
                     losses = sum(loss for loss in loss_dict.values())
                     self.scaler.scale(losses).backward()
                     self.scaler.step(optimizer)
                     self.scaler.update()
             else:
-                loss_dict = self.forward(images, targets)
+                loss_dict = self.model(images, targets)
                 losses = sum(loss for loss in loss_dict.values())
                 losses.backward()
                 optimizer.step()
@@ -58,7 +57,7 @@ class BaseNetwork(torch.nn.Module):
             targets = [{k: v.to(self.device) for k, v in t.items() if isinstance(v, torch.Tensor)} for t in targets]
 
             with torch.no_grad():
-                loss_dict = self.forward(images, targets)
+                loss_dict = self.model(images, targets)
                 losses = sum(loss for loss in loss_dict.values())
 
             epoch_loss += losses.detach().item()
@@ -69,5 +68,3 @@ class BaseNetwork(torch.nn.Module):
         self.val_epoch_loss = epoch_loss / len(loader)
         self.val_epoch_mask_loss = epoch_mask_loss / len(loader)
 
-    def forward(self, image, target):
-        pass

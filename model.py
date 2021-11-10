@@ -1,27 +1,36 @@
 import torch
-from arch import CellModel
 import os
+import shutil
+from arch import get_model, BaseNetwork
 
 
 class Trainer:
     def __init__(self, opt):
         # DEFINE MODEL
         if opt['architecture']['name'] == "Mask-RCNN":
-            self.arch = CellModel(opt)
+            model = get_model(opt)
         else:
             raise NotImplementedError(f"Model {opt['architecture']['name']} not implemented yet!")
-        self.arch.to(torch.device(opt['device']))
+
+        model.to(opt['device'])
+        self.arch = BaseNetwork(model, opt)
 
         # DEFINE LOSS
         # Loss is defined inside CellModel model!
 
         # DEFINE OPTIMIZER
-        params = [p for p in self.arch.parameters() if p.requires_grad]
+        params = [p for p in self.arch.model.parameters() if p.requires_grad]
         if opt['optimizer']['type'] == "SGD":
             self.optimizer = torch.optim.SGD(
                 params,
                 opt['optimizer']['lr'],
                 momentum=opt['optimizer']['momentum'],
+                weight_decay=opt['optimizer']['weight_decay']
+            )
+        elif opt['optimizer']['type'] == "adam":
+            self.optimizer = torch.optim.Adam(
+                params,
+                opt['optimizer']['lr'],
                 weight_decay=opt['optimizer']['weight_decay']
             )
         else:
@@ -32,6 +41,11 @@ class Trainer:
 
         self.opt = opt
 
+        # Save configuration
+        self.save_dir = os.path.join(self.opt['model']['save_path'], self.opt['model']['exp_name'])
+        os.makedirs(self.save_dir, exist_ok=True)
+        shutil.copy('params.yml', os.path.join(self.save_dir, 'params.yml'))
+
     def save(self, epoch):
         checkpoint = {
             'model': self.arch.state_dict(),
@@ -40,18 +54,15 @@ class Trainer:
         if self.opt['half_precision']:
             checkpoint['scaler'] = self.arch.scaler.state_dict()
 
-        save_dir = os.path.join(self.opt['model']['save_path'], self.opt['model']['exp_name'])
-        os.makedirs(save_dir, exist_ok=True)
         torch.save(checkpoint,
-                   os.path.join(save_dir, f"checkpoint_{epoch}_{self.arch.epoch_loss:.4f}_{self.arch.epoch_mask_loss:.4f}.pt"))
+                   os.path.join(self.save_dir, f"checkpoint_{epoch}_{self.arch.val_epoch_loss:.4f}_{self.arch.val_epoch_mask_loss:.4f}.pt"))
 
     def resume(self):
-        save_dir = os.path.join(self.opt['model']['save_path'], self.opt['model']['exp_name'])
-        if os.path.isdir(save_dir) and len(os.listdir(save_dir)) > 0:
-            checkpoints = os.listdir(save_dir)
+        checkpoints = [name for name in os.listdir(self.save_dir) if ".pt" in name]
+        if len(checkpoints) > 0:
             checkpoints.sort(key=lambda x: int(x.split("_")[1]), reverse=True)
             print(f"Resuming from {checkpoints[0]}...")
-            checkpoint = torch.load(os.path.join(save_dir, checkpoints[0]), map_location=self.opt['device'])
+            checkpoint = torch.load(os.path.join(self.save_dir, checkpoints[0]), map_location=self.opt['device'])
             self.arch.load_state_dict(checkpoint['model'])
             self.optimizer.load_state_dict(checkpoint['optimizer'])
             if self.opt['half_precision']:
