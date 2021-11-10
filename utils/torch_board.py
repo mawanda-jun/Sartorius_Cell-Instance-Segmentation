@@ -25,15 +25,12 @@ class TorchBoard:
 
     def write_epoch_metrics(self, epoch: int, metrics: Dict[str, torch.Tensor],
                             name: str = 'Training') -> None:
-        for metric in metrics.keys():
-            self.__tb_writer.add_scalar(f"{name} metrics [per epoch]/{metric}", metrics[metric], epoch)
+        self.__tb_writer.add_scalars(f"Epoch {name}", metrics, epoch)
 
     def write_batch_metrics(self, metrics: Dict[str, torch.Tensor],
                             name: str = 'Training'):
         if self.__batch_iter % self.__minibatch_interval == 0:  # every minibatch_interval...
-            for metric in metrics.keys():
-                self.__tb_writer.add_scalar(name + " metrics [per batch]/" + metric,
-                                            metrics[metric], self.__batch_iter)
+            self.__tb_writer.add_scalars(f"Batch {name}", metrics, self.__batch_iter)
         self.__batch_iter += 1
 
     def draw_model(self, net: torch.nn.Module, input_to_model: Union[torch.Tensor, List[torch.Tensor]]):

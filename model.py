@@ -103,15 +103,15 @@ class Trainer:
             # Save to board
             self._torch_board.write_epoch_metrics(epoch=epoch,
                                                   metrics={
-                                                      "Loss": self.arch.epoch_loss,
-                                                      "Mask loss": self.arch.epoch_mask_loss
+                                                      "train": self.arch.epoch_loss,
+                                                      "val": self.arch.val_epoch_loss
                                                   },
-                                                  name="Training")
+                                                  name="Loss")
             self._torch_board.write_epoch_metrics(epoch=epoch,
                                                   metrics={
-                                                      "Loss": self.arch.val_epoch_loss,
-                                                      "Mask loss": self.arch.val_epoch_mask_loss
+                                                      "train": self.arch.epoch_mask_loss,
+                                                      "val": self.arch.val_epoch_mask_loss
                                                   },
-                                                  name="Validation")
+                                                  name="Mask loss")
         # Make sure that all pending events have been written to disk
         self._torch_board.flush()
