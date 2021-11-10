@@ -1,11 +1,10 @@
 import os
+import shutil
 
 import torch
 
 from arch import CellModel
 from utils.torch_board import TorchBoard
-import os
-import shutil
 
 
 class Trainer:
@@ -61,7 +60,8 @@ class Trainer:
             checkpoint['scaler'] = self.arch.scaler.state_dict()
 
         torch.save(checkpoint,
-                   os.path.join(self.save_dir, f"checkpoint_{epoch}_{self.arch.val_epoch_loss:.4f}_{self.arch.val_epoch_mask_loss:.4f}.pt"))
+                   os.path.join(self.save_dir,
+                                f"checkpoint_{epoch}_{self.arch.val_epoch_loss:.4f}_{self.arch.val_epoch_mask_loss:.4f}.pt"))
 
     def resume(self):
         checkpoints = [name for name in os.listdir(self.save_dir) if ".pt" in name]
