@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def rle_to_matrix(rle_enc, width):
     int_rle = []
     temp_rle = []

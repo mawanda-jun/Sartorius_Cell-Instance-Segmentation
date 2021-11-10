@@ -1,10 +1,13 @@
-import torch
-from arch import CellModel
 import os
+
+import torch
+
+from arch import CellModel
+from utils.torch_board import TorchBoard
 
 
 class Trainer:
-    def __init__(self, opt):
+    def __init__(self, opt, **tensorboard_args):
         # DEFINE MODEL
         if opt['architecture']['name'] == "Mask-RCNN":
             self.arch = CellModel(opt)
@@ -31,6 +34,7 @@ class Trainer:
         self.lr_scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
 
         self.opt = opt
+        self._torch_board = TorchBoard(**tensorboard_args)
 
     def save(self, epoch):
         checkpoint = {
@@ -43,7 +47,8 @@ class Trainer:
         save_dir = os.path.join(self.opt['model']['save_path'], self.opt['model']['exp_name'])
         os.makedirs(save_dir, exist_ok=True)
         torch.save(checkpoint,
-                   os.path.join(save_dir, f"checkpoint_{epoch}_{self.arch.epoch_loss:.4f}_{self.arch.epoch_mask_loss:.4f}.pt"))
+                   os.path.join(save_dir,
+                                f"checkpoint_{epoch}_{self.arch.epoch_loss:.4f}_{self.arch.epoch_mask_loss:.4f}.pt"))
 
     def resume(self):
         save_dir = os.path.join(self.opt['model']['save_path'], self.opt['model']['exp_name'])
@@ -75,4 +80,22 @@ class Trainer:
 
             if epoch % self.opt['training']['save_step'] == 0:
                 self.save(epoch)
-            print(f"Epoch {epoch}\tLoss/Val: {self.arch.epoch_loss:.4f}/{self.arch.val_epoch_loss:.4f}\tMask loss/val: {self.arch.epoch_mask_loss:.4f}/{self.arch.val_epoch_mask_loss:.4f}")
+            print(
+                f"Epoch {epoch}\t"
+                f"Loss/Val: {self.arch.epoch_loss:.4f}/{self.arch.val_epoch_loss:.4f}\t"
+                f"Mask loss/val:{self.arch.epoch_mask_loss:.4f}/{self.arch.val_epoch_mask_loss:.4f}")
+            # Save to board
+            self._torch_board.write_epoch_metrics(epoch=epoch,
+                                                  metrics={
+                                                      "Loss": self.arch.epoch_loss,
+                                                      "Mask loss": self.arch.epoch_mask_loss
+                                                  },
+                                                  name="Training")
+            self._torch_board.write_epoch_metrics(epoch=epoch,
+                                                  metrics={
+                                                      "Loss": self.arch.val_epoch_loss,
+                                                      "Mask loss": self.arch.val_epoch_mask_loss
+                                                  },
+                                                  name="Validation")
+        # Make sure that all pending events have been written to disk
+        self._torch_board.flush()
