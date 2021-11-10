@@ -28,6 +28,9 @@ class CellModel(BaseNetwork):
         # and replace the mask predictor with a new one
         self.model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, opt['architecture']['num_classes'] + 1)
 
+        for param in self.model.parameters():
+            param.requires_grad = True
+
     def forward(self, images, targets):
         return self.model(images, targets)
 

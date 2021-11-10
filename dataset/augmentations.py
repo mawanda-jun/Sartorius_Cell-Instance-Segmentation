@@ -15,7 +15,7 @@ def get_augmentations(is_training=True):
         bbox_params=A.BboxParams(
             format='pascal_voc',
             label_fields=['bbox_classes'],
-            min_area=30
+            min_area=0
         )
     )
 

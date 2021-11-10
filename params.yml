@@ -21,7 +21,7 @@ data:
     3: 0.5
 
 model:
-  exp_name: exp_2_adam
+  exp_name: exp_3_like_online
   save_path: experiments
 
 training:
@@ -29,11 +29,12 @@ training:
   save_step: 10
   shuffle: true
   num_workers: 4
-  batch_size: 10
+  batch_size: 2
   autoresume: true
 
 optimizer:
-  type: adam
-  lr: !!float 1e-5
-  weight_decay: 0.0
+  type: SGD
+  lr: !!float 1e-3
+  weight_decay: !!float 5e-4
   momentum: 0.9
+  scheduler: false

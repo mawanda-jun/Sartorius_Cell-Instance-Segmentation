@@ -35,9 +35,9 @@ class BaseNetwork(torch.nn.Module):
                     self.scaler.update()
             else:
                 loss_dict = self.forward(images, targets)
-            losses = sum(loss for loss in loss_dict.values())
-            losses.backward()
-            optimizer.step()
+                losses = sum(loss for loss in loss_dict.values())
+                losses.backward()
+                optimizer.step()
 
             epoch_loss += losses.detach().item()
             epoch_mask_loss += loss_dict['loss_mask'].detach().item()

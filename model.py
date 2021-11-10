@@ -35,7 +35,10 @@ class Trainer:
             raise NotImplementedError(f"Optimizer {opt['optimizer']['type']} not implemented yet!")
 
         # DEFINE SCHEDULER
-        self.lr_scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
+        if opt['optimizer']['scheduler']:
+            self.lr_scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.1)
+        else:
+            self.lr_scheduler = None
 
         self.opt = opt
 
@@ -80,7 +83,8 @@ class Trainer:
             self.arch.update_params(train_loader, self.optimizer)
             self.arch.validate(val_loader)
             # TRIGGER EPOCH LR SCHEDULER
-            self.lr_scheduler.step()
+            if self.lr_scheduler is not None:
+                self.lr_scheduler.step()
 
             if epoch % self.opt['training']['save_step'] == 0:
                 self.save(epoch)
