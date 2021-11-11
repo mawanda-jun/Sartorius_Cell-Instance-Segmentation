@@ -8,7 +8,8 @@ import numpy as np
 
 
 class CellDataset(Dataset):
-    def __init__(self, data_dir, coco_path, transforms=None):
+    def __init__(self, data_dir, coco_path, crop_transforms=None, transforms=None):
+        self.crop_transforms = crop_transforms
         self.transforms = transforms
 
         self.data_dir = data_dir
@@ -50,10 +51,10 @@ class CellDataset(Dataset):
             areas.append(ann['area'])
             iscrowd.append(ann['iscrowd'])
 
-        if self.transforms is not None:
+        if self.crop_transforms is not None:
             new_bboxes = []
             while len(new_bboxes) == 0:
-                transformed = self.transforms(
+                transformed = self.crop_transforms(
                     image=img,
                     masks=masks,
                     bboxes=boxes,
@@ -62,13 +63,22 @@ class CellDataset(Dataset):
                 new_masks, new_bboxes, new_areas, new_labels = remove_empty_masks(transformed['masks'], labels)
                 if len(new_masks) == 0:
                     continue
-                new_img = transformed['image']
 
-            img = new_img
+            img = transformed['image']
             masks = new_masks
             boxes = new_bboxes
             labels = new_labels
             areas = new_areas
+
+        if self.transforms is not None:
+            transformed = self.transforms(
+                image=img,
+                masks=masks,
+                bboxes=boxes,
+                bbox_classes=labels
+            )
+            img = transformed['image']
+            masks, bboxes, areas, labels = remove_empty_masks(transformed['masks'], labels)
 
         img = torch.tensor(img, dtype=torch.uint8).unsqueeze(0)
         boxes = torch.tensor(boxes).float()

@@ -1,7 +1,7 @@
 from utils import fix_all_seeds
 import yaml
 from model import Trainer
-from dataset import CellDataset, collate_fn, get_augmentations
+from dataset import CellDataset, collate_fn, get_augmentations, get_crop_augmentations
 from torch.utils.data import DataLoader
 
 
@@ -27,6 +27,12 @@ def main():
         coco_path=opt['data']['val_json'],
         transforms=get_augmentations(is_training=False)
     )
+
+    # Add crop augmentation if there is 4X mode
+    if "4X" in opt['data']['train_json']:
+        train_set.crop_transforms = get_crop_augmentations(is_training=True)
+        val_set.crop_transforms = get_crop_augmentations(is_training=False)
+
     train_loader = DataLoader(
         train_set,
         batch_size=opt['training']['batch_size'],

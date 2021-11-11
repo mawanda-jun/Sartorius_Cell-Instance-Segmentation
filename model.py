@@ -55,8 +55,16 @@ class Trainer:
         self._torch_board = TorchBoard(log_path=Path(os.path.join(self.save_dir, 'tensorboard')), **tensorboard_args)
 
     def save(self, epoch):
+        # Clean folder from previous n checkpoints
+        checkpoints = [name for name in os.listdir(self.save_dir) if ".pt" in name]
+        if len(checkpoints) > self.opt['training']['num_saves']:
+            checkpoints.sort(key=lambda x: int(x.split("_")[1]), reverse=True)
+            for checkpoint in checkpoints[self.opt['training']['num_saves']:]:
+                os.remove(os.path.join(self.save_dir, checkpoint))
+        # Save actual checkpoint
         checkpoint = {
-            'model': self.arch.state_dict(),
+            'epoch': epoch,
+            'model': self.arch.model.state_dict(),
             'optimizer': self.optimizer.state_dict()
         }
         if self.opt['half_precision']:
@@ -72,11 +80,11 @@ class Trainer:
             checkpoints.sort(key=lambda x: int(x.split("_")[1]), reverse=True)
             print(f"Resuming from {checkpoints[0]}...")
             checkpoint = torch.load(os.path.join(self.save_dir, checkpoints[0]), map_location=self.opt['device'])
-            self.arch.load_state_dict(checkpoint['model'])
+            self.arch.model.load_state_dict(checkpoint['model'])
             self.optimizer.load_state_dict(checkpoint['optimizer'])
             if self.opt['half_precision']:
                 self.arch.scaler.load_state_dict(checkpoint['scaler'])
-            return int(checkpoints[0].split("_")[1])
+            return checkpoint['epoch']
         else:
             return 0
 
