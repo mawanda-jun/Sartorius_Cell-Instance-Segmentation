@@ -24,6 +24,18 @@ def remove_empty_masks(masks, labels):
     return new_masks, new_bboxes, new_areas, new_labels
 
 
+def get_boxes_areas_from_masks(masks):
+    new_bboxes = []
+    new_areas = []
+    for mask in masks:
+        bbox = get_boxes_from_mask(mask)
+        area = get_area_from_bbox(bbox)
+        if area > 0:
+            new_bboxes.append(bbox)
+            new_areas.append(area)
+    return new_bboxes, new_areas
+
+
 def get_boxes_from_mask(mask):
     """ Helper, gets bounding boxes from masks """
     pos = np.nonzero(mask)

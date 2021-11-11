@@ -25,7 +25,7 @@ model:
   save_path: experiments
 
 training:
-  epochs: 500
+  epochs: 200
   save_step: 5
   num_saves: 5
   shuffle: true

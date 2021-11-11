@@ -59,7 +59,7 @@ class Trainer:
         checkpoints = [name for name in os.listdir(self.save_dir) if ".pt" in name]
         if len(checkpoints) > self.opt['training']['num_saves']:
             checkpoints.sort(key=lambda x: int(x.split("_")[1]), reverse=True)
-            for checkpoint in checkpoints[self.opt['training']['num_saves']:]:
+            for checkpoint in checkpoints[self.opt['training']['num_saves'] - 1:]:
                 os.remove(os.path.join(self.save_dir, checkpoint))
         # Save actual checkpoint
         checkpoint = {
