@@ -1,8 +1,7 @@
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import os
-import numpy as np
-from dataset import analyze_sample, collate_fn
+from dataset import analyze_sample, collate_fn, remove_empty_masks
 from pycocotools.coco import COCO
 import torch
 import numpy as np
@@ -52,15 +51,24 @@ class CellDataset(Dataset):
             iscrowd.append(ann['iscrowd'])
 
         if self.transforms is not None:
-            transformed = self.transforms(
-                image=img,
-                masks=masks,
-                bboxes=boxes,
-                bbox_classes=labels,
-            )
-            img = transformed['image']
-            masks = transformed['masks']
-            boxes = [[round(el) for el in box] for box in transformed['bboxes']]
+            new_bboxes = []
+            while len(new_bboxes) == 0:
+                transformed = self.transforms(
+                    image=img,
+                    masks=masks,
+                    bboxes=boxes,
+                    bbox_classes=labels
+                )
+                new_masks, new_bboxes, new_areas, new_labels = remove_empty_masks(transformed['masks'], labels)
+                if len(new_masks) == 0:
+                    continue
+                new_img = transformed['image']
+
+            img = new_img
+            masks = new_masks
+            boxes = new_bboxes
+            labels = new_labels
+            areas = new_areas
 
         img = torch.tensor(img, dtype=torch.uint8).unsqueeze(0)
         boxes = torch.tensor(boxes).float()
@@ -92,6 +100,7 @@ if __name__ == '__main__':
         num_workers=0,
         collate_fn=collate_fn
     )
+    # img, target = dataset[39]
     img, target = dataset['56b8cad4f8e7']
     analyze_sample(img, target)
     # box_areas = []

@@ -4,18 +4,22 @@ import albumentations as A
 def get_augmentations(is_training=True):
     if is_training:
         transforms = [
-            # A.RandomCrop(520, 704, always_apply=True),
+            A.RandomCrop(512, 512, always_apply=True),
+            # A.GaussNoise(),
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5)
         ]
     else:
-        transforms = []
+        transforms = [
+            # TODO: should look at the entire image! This is just for debugging for 4X experiments
+            A.RandomCrop(512, 512, always_apply=True)
+        ]
     return A.Compose(
         transforms,
         bbox_params=A.BboxParams(
             format='pascal_voc',
             label_fields=['bbox_classes'],
-            min_area=0
+            min_area=200
         )
     )
 

@@ -8,8 +8,8 @@ architecture:
 
 data:
   sample_submission: sample_submission.csv
-  train_json: annotations_train.json
-  val_json: annotations_val.json
+  train_json: annotations_train_4X.json
+  val_json: annotations_val_4X.json
   data_path: data/
   mask_threshold:
     1: 0.55
@@ -21,20 +21,20 @@ data:
     3: 0.5
 
 model:
-  exp_name: exp_4_like_online
+  exp_name: exp_6_4X
   save_path: experiments
 
 training:
   epochs: 100
-  save_step: 10
+  save_step: 5
   shuffle: true
-  num_workers: 4
-  batch_size: 8
+  num_workers: 8
+  batch_size: 15
   autoresume: true
 
 optimizer:
   type: SGD
-  lr: !!float 1e-3
+  lr: !!float 1e-4
   weight_decay: !!float 5e-4
   momentum: 0.9
   scheduler: false
