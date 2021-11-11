@@ -29,9 +29,9 @@ def main():
     )
 
     # Add crop augmentation if there is 4X mode
-    if "4X" in opt['data']['train_json']:
-        train_set.crop_transforms = get_crop_augmentations(is_training=True)
-        val_set.crop_transforms = get_crop_augmentations(is_training=False)
+    # if "4X" in opt['data']['train_json']:
+    #     train_set.crop_transforms = get_crop_augmentations(is_training=True)
+    #     val_set.crop_transforms = get_crop_augmentations(is_training=False)
 
     train_loader = DataLoader(
         train_set,
