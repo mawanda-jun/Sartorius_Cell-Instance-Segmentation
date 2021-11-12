@@ -83,26 +83,21 @@ class BaseNetwork(torch.nn.Module):
             # Check every image
             batch_mAP = 0.0
             for pred, target in zip(preds, targets):
-                masks = target['masks']
-                labels = target['labels']
-                mask = combine_masks(masks, 0.5, images[0].shape[1], images[0].shape[2])
-                # Extract pred mask and use threshold based on label
-                # pred_masks = pred['masks'].squeeze()
+                mask = combine_masks(target['masks'], 0.5, images[0].shape[1], images[0].shape[2])
                 pred_labels = pred['labels'].cpu().numpy()
                 try:
+                    # All labels are equal per image, so we can just keep one label
                     threshold = self.opt['data']['mask_threshold'][pred_labels[0]]
-                except IndexError as e:
-                    print(pred_labels)
-                    print(e)
-                    print("Continuing..")
+                except IndexError:
                     threshold = 0.5
+                    print("No masks found in image! Threshold set to 0.5, continuing...")
                 pred_mask = combine_masks(get_filtered_masks(pred, self.opt), threshold, images[0].shape[1], images[0].shape[2])
                 # Competition metric: average over the number of labels!
-                score = iou_map([mask], [pred_mask]) / len(labels)
+                score = iou_map([mask], [pred_mask]) / len(target['labels'])
                 batch_mAP += score
-
-            self.test_mAP += (batch_mAP / len(preds))
-
+            # Average over number of images
+            self.test_mAP += (batch_mAP / len(images))
+        # Average over batch
         self.test_mAP / len(loader)
 
     def forward(self, image, target):

@@ -21,22 +21,28 @@ data:
     3: 0.5
 
 model:
-  exp_name: exp_6_4X_sgd_1e-2
+  exp_name: exp_6_4X_sgd_1e-3
   save_path: experiments
 
 training:
-  epochs: 100
+  epochs: 50
   save_step: 5
-  num_saves: 5
-  num_epoch_test: 5
+  num_saves: 10
   shuffle: true
   num_workers: 8
   batch_size: 15
   autoresume: true
 
+test:
+  epoch_checkpoint: 50
+  num_workers: 0
+  batch_size: 10
+  shuffle: false
+  num_epoch_test: 1
+
 optimizer:
   type: SGD
-  lr: !!float 1e-2
+  lr: !!float 1e-3
   weight_decay: !!float 5e-4
   momentum: 0.9
   scheduler: false

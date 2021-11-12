@@ -1,8 +1,9 @@
 from utils import fix_all_seeds
 import yaml
-from model import Trainer
+from model import Trainer, Tester
 from dataset import CellDataset, collate_fn, get_augmentations, get_crop_augmentations
 from torch.utils.data import DataLoader
+import os
 
 
 def main():
@@ -50,5 +51,38 @@ def main():
     trainer.fit(train_loader, val_loader)
 
 
+def test(model_path):
+    fix_all_seeds(42)
+
+    # Read configuration file
+    opt = None
+    with open(os.path.join(model_path, 'params.yml')) as stream:
+        try:
+            opt = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+    tester = Tester(opt)
+
+    test_set = CellDataset(
+        data_dir=opt['data']['data_path'],
+        coco_path=opt['data']['val_json'],
+        transforms=get_augmentations(is_training=False)
+    )
+
+    # Add crop augmentation if there is 4X mode
+    if "4X" in opt['data']['train_json']:
+        test_set.crop_transforms = get_crop_augmentations(is_training=False)
+
+    test_loader = DataLoader(
+        test_set,
+        batch_size=opt['test']['batch_size'],
+        shuffle=opt['test']['shuffle'],
+        num_workers=opt['test']['num_workers'],
+        collate_fn=collate_fn
+    )
+    tester.test(test_loader)
+
+
 if __name__ == "__main__":
     main()
+    # test('experiments/exp_6_4X_sgd_1e-2')

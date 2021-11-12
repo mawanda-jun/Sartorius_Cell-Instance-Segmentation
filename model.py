@@ -104,7 +104,7 @@ class Trainer:
             self.arch.validate(val_loader)
 
             # Test model
-            if epoch % self.opt['training']['num_epoch_test'] == 0:
+            if epoch % self.opt['test']['num_epoch_test'] == 0:
                 self.arch.test(val_loader)
                 self._torch_board.write_epoch_metrics(epoch=epoch,
                                                       metrics={
@@ -139,5 +139,69 @@ class Trainer:
                                                       "val": self.arch.val_epoch_mask_loss
                                                   },
                                                   name="Mask loss")
+        # Make sure that all pending events have been written to disk
+        self._torch_board.flush()
+
+
+class Tester:
+    def __init__(self, opt, **tensorboard_args):
+        # DEFINE MODEL
+        if opt['architecture']['name'] == "Mask-RCNN":
+            self.arch = CellModel(opt)
+        else:
+            raise NotImplementedError(f"Model {opt['architecture']['name']} not implemented yet!")
+        self.arch.to(torch.device(opt['device']))
+
+        self.opt = opt
+
+        # Save configuration
+        self.save_dir = os.path.join(self.opt['model']['save_path'], self.opt['model']['exp_name'])
+
+        # Instantiate tensorboard
+        self._torch_board = TorchBoard(
+            log_path=Path(os.path.join(self.save_dir, 'tensorboard')),
+            log_name="good-looking-name",
+            **tensorboard_args
+        )
+
+    def resume(self, epoch_checkpoint):
+        """
+        Resume given checkpoint
+        :param epoch_checkpoint: epoch of checkpoint we want to resume or "last" to resume the last checkpoint.
+        :return:
+        """
+        checkpoints = [name for name in os.listdir(self.save_dir) if ".pt" in name]
+        checkpoints.sort(key=lambda x: int(x.split("_")[1]))
+        if epoch_checkpoint == 'last':
+            index = -1
+        else:
+            epochs_list = [int(x.split("_")[1]) for x in checkpoints]
+            try:
+                index = epochs_list.index(epoch_checkpoint)
+            except ValueError as e:
+                print(f"Epoch checkpoint {epoch_checkpoint} is not in list! Please select another epoch!")
+                raise ValueError(e)
+
+        print(f"Testing checkpoint {checkpoints[index]}...")
+        checkpoint = torch.load(os.path.join(self.save_dir, checkpoints[index]), map_location=self.opt['device'])
+        self.arch.model.load_state_dict(checkpoint['model'])
+
+        epoch = int(checkpoints[index].split("_")[1])
+        return epoch
+
+    def test(self, test_loader):
+        epoch = self.resume(self.opt['test']['epoch_checkpoint'])
+
+        self.arch.test(test_loader)
+        self._torch_board.write_epoch_metrics(epoch=epoch,
+                                              metrics={
+                                                  "mAP": self.arch.test_mAP
+                                              },
+                                              name="Metrics")
+
+        printing_text = f"mAP:{self.arch.test_mAP:.4f}"
+
+        print(printing_text)
+
         # Make sure that all pending events have been written to disk
         self._torch_board.flush()

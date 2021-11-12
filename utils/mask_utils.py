@@ -48,7 +48,7 @@ def combine_masks(masks, mask_threshold, height, width):
     """
     maskimg = np.zeros((height, width))
     # print(len(masks.shape), masks.shape)
-    for m, mask in enumerate(masks,1):
+    for m, mask in enumerate(masks, 1):
         maskimg[mask>mask_threshold] = m
     return maskimg
 
