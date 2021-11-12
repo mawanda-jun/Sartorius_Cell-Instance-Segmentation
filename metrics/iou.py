@@ -3,16 +3,18 @@ import numpy as np
 import pandas as pd
 import torch
 from tqdm import tqdm
+
 from utils import combine_masks, get_filtered_masks
 
 
-def compute_iou(labels, y_pred, verbose=0):
+def compute_iou(labels, y_pred, verbose: bool = 0):
     """
     Computes the IoU for instance labels and predictions.
 
     Args:
         labels (np array): Labels.
         y_pred (np array): predictions
+        verbose (bool): talkativeness
 
     Returns:
         np array: IoU matrix, of size true_objects x pred_objects.
@@ -122,7 +124,8 @@ def get_score(ds, mdl, opt):
         with torch.no_grad():
             result = mdl([img.to(opt['device'])])[0]
 
-        masks = combine_masks(targets['masks'], 0.5, img.shape[0], img.shape[1])  # TODO: check if width and height are correct!
+        masks = combine_masks(targets['masks'], 0.5, img.shape[0],
+                              img.shape[1])  # TODO: check if width and height are correct!
         labels = pd.Series(result['labels'].cpu().numpy()).value_counts()
 
         mask_threshold = opt['data']['mask_threshold'][labels.sort_values().index[-1]]

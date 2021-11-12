@@ -1,6 +1,8 @@
 import json
-from rle_int_encoding import scale_up_rle_enc
+
 from tqdm import tqdm
+
+from rle_int_encoding import scale_up_rle_enc
 
 if __name__ == '__main__':
     path = '../data/train.json'
@@ -12,8 +14,8 @@ if __name__ == '__main__':
     for image in tqdm(images, desc="Translating images path and dimensions..."):
         new_image = {
             **image,
-            "width": image['width']*scale,
-            "height": image['height']*scale,
+            "width": image['width'] * scale,
+            "height": image['height'] * scale,
             "file_name": image['file_name'].replace('train', 'train_4X')
         }
         new_images.append(new_image)
@@ -30,10 +32,10 @@ if __name__ == '__main__':
                     width=ann['segmentation']['size'][0],
                     scale=scale
                 ),
-                "size": [i*scale for i in ann['segmentation']['size']]
+                "size": [i * scale for i in ann['segmentation']['size']]
             },
-            "bbox": [i*scale for i in ann['bbox']],
-            "area": ann['area']*(scale**2)
+            "bbox": [i * scale for i in ann['bbox']],
+            "area": ann['area'] * (scale ** 2)
         }
         new_anns.append(new_ann)
     coco_info['annotations'] = new_anns

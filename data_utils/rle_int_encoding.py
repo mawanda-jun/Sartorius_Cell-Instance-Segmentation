@@ -1,6 +1,3 @@
-import numpy as np
-
-
 def rle_to_matrix(rle_enc, width):
     int_rle = []
     temp_rle = []
@@ -43,7 +40,7 @@ def scale_up_rle_enc(rle_enc, width, scale):
     int_rle = rle_to_matrix(rle_enc, width)
     new_mask = []
     for line in int_rle:
-        line = [i*scale for i in line]
+        line = [i * scale for i in line]
         for _ in range(scale):
             new_mask.append(line)
     scaled_rle = reconstruct_int_rle(new_mask)

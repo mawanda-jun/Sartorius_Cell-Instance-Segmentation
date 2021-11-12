@@ -1,9 +1,10 @@
-from utils import fix_all_seeds
 import yaml
-from model import Trainer, Tester
-from dataset import CellDataset, collate_fn, get_augmentations, get_crop_augmentations
 from torch.utils.data import DataLoader
 import os
+
+from dataset import CellDataset, collate_fn, get_augmentations, get_crop_augmentations
+from model import Trainer
+from utils import fix_all_seeds
 
 
 def main():

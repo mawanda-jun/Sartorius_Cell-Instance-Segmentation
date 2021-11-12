@@ -40,11 +40,3 @@ class TorchBoard:
 
     def flush(self) -> None:
         self.__tb_writer.flush()
-
-
-def main():
-    tb = TorchBoard()
-
-
-if __name__ == "__main__":
-    main()
