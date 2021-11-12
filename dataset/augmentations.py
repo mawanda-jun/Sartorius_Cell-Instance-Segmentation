@@ -38,4 +38,3 @@ def get_augmentations(is_training=True):
             min_area=200
         )
     )
-

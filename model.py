@@ -1,11 +1,11 @@
 import os
 import shutil
+from pathlib import Path
 
 import torch
 
 from arch import CellModel
 from utils.torch_board import TorchBoard
-from pathlib import Path
 
 
 class Trainer:
@@ -117,8 +117,8 @@ class Trainer:
 
             if epoch % self.opt['training']['save_step'] == 0:
                 self.save(epoch)
-            printing_text = f"Epoch {epoch}\t"\
-                            f"Loss/Val: {self.arch.epoch_loss:.4f}/{self.arch.val_epoch_loss:.4f}\t"\
+            printing_text = f"Epoch {epoch}\t" \
+                            f"Loss/Val: {self.arch.epoch_loss:.4f}/{self.arch.val_epoch_loss:.4f}\t" \
                             f"Mask loss/val:{self.arch.epoch_mask_loss:.4f}/{self.arch.val_epoch_mask_loss:.4f}\t"
             # Add mAP printing
             if epoch % self.opt['training']['num_epoch_test'] == 0:

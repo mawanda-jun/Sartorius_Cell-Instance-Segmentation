@@ -1,5 +1,6 @@
 import numpy as np
 
+
 # ref: https://www.kaggle.com/inversion/run-length-decoding-quick-start
 def rle_decode(mask_rle, shape, color=1):
     '''
@@ -14,12 +15,12 @@ def rle_decode(mask_rle, shape, color=1):
     starts = list(map(lambda x: int(x) - 1, s[0::2]))
     lengths = list(map(int, s[1::2]))
     ends = [x + y for x, y in zip(starts, lengths)]
-    if len(shape)==3:
+    if len(shape) == 3:
         img = np.zeros((shape[0] * shape[1], shape[2]), dtype=np.float32)
     else:
         img = np.zeros(shape[0] * shape[1], dtype=np.float32)
     for start, end in zip(starts, ends):
-        img[start : end] = color
+        img[start: end] = color
 
     return img.reshape(shape)
 
@@ -29,7 +30,8 @@ def rle_encoding(x):
     run_lengths = []
     prev = -2
     for b in dots:
-        if (b>prev+1): run_lengths.extend((b + 1, 0))
+        if b > prev + 1:
+            run_lengths.extend((b + 1, 0))
         run_lengths[-1] += 1
         prev = b
     return ' '.join(map(str, run_lengths))
@@ -48,8 +50,8 @@ def combine_masks(masks, mask_threshold, height, width):
     """
     maskimg = np.zeros((height, width))
     # print(len(masks.shape), masks.shape)
-    for m, mask in enumerate(masks,1):
-        maskimg[mask>mask_threshold] = m
+    for m, mask in enumerate(masks, 1):
+        maskimg[mask > mask_threshold] = m
     return maskimg
 
 

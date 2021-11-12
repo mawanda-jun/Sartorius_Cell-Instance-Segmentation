@@ -1,5 +1,6 @@
 import torch
 from tqdm import tqdm
+
 from metrics import iou_map, combine_masks, get_filtered_masks
 
 
@@ -43,7 +44,8 @@ class BaseNetwork(torch.nn.Module):
             epoch_loss += losses.detach().item()
             epoch_mask_loss += loss_dict['loss_mask'].detach().item()
 
-            tqdm_loader.set_description(f"Batch loss: {losses.detach().item():.4f} Mask batch loss: {loss_dict['loss_mask'].detach().item():.4f}")
+            tqdm_loader.set_description(
+                f"Batch loss: {losses.detach().item():.4f} Mask batch loss: {loss_dict['loss_mask'].detach().item():.4f}")
 
         self.epoch_loss = epoch_loss / len(loader)
         self.epoch_mask_loss = epoch_mask_loss / len(loader)
@@ -64,7 +66,8 @@ class BaseNetwork(torch.nn.Module):
             epoch_loss += losses.detach().item()
             epoch_mask_loss += loss_dict['loss_mask'].detach().item()
 
-            tqdm_loader.set_description(f"Batch val loss: {losses.detach().item():.4f} Mask batch val loss: {loss_dict['loss_mask'].detach().item():.4f}")
+            tqdm_loader.set_description(
+                f"Batch val loss: {losses.detach().item():.4f} Mask batch val loss: {loss_dict['loss_mask'].detach().item():.4f}")
 
         self.val_epoch_loss = epoch_loss / len(loader)
         self.val_epoch_mask_loss = epoch_mask_loss / len(loader)
@@ -96,7 +99,8 @@ class BaseNetwork(torch.nn.Module):
                     print(e)
                     print("Continuing..")
                     threshold = 0.5
-                pred_mask = combine_masks(get_filtered_masks(pred, self.opt), threshold, images[0].shape[1], images[0].shape[2])
+                pred_mask = combine_masks(get_filtered_masks(pred, self.opt), threshold, images[0].shape[1],
+                                          images[0].shape[2])
                 # Competition metric: average over the number of labels!
                 score = iou_map([mask], [pred_mask]) / len(labels)
                 batch_mAP += score

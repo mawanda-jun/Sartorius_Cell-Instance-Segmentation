@@ -1,10 +1,10 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.patches import Rectangle
 
 
 def get_area_from_bbox(bbox):
-    return (bbox[2]-bbox[0])*(bbox[3]-bbox[1])
+    return (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
 
 
 def remove_empty_masks(masks, labels):
@@ -56,7 +56,8 @@ def analyze_sample(img, targets):
     plt.imshow(masks, alpha=0.3)
 
     for box in targets['boxes']:
-        plt.gca().add_patch(Rectangle((box[0], box[1]), box[2]-box[0], box[3]-box[1], facecolor='none', lw=1, edgecolor='yellow'))
+        plt.gca().add_patch(
+            Rectangle((box[0], box[1]), box[2] - box[0], box[3] - box[1], facecolor='none', lw=1, edgecolor='yellow'))
     plt.title('Ground truth')
     plt.show()
 

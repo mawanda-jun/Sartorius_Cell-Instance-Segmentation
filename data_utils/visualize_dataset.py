@@ -1,10 +1,12 @@
-from pycocotools.coco import COCO
-import skimage.io as io
-import matplotlib.pyplot as plt
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import skimage.io as io
+from pycocotools.coco import COCO
 from PIL import Image
 import os
 import albumentations as A
+
 from rle_int_encoding import scale_up_rle_enc, reconstruct_int_rle, rle_to_matrix
 
 
@@ -26,7 +28,8 @@ def first_visualization():
         new_ann = {
             **ann,
             "segmentation": {
-                "counts": reconstruct_int_rle(rle_to_matrix(ann['segmentation']['counts'], ann['segmentation']['size'][1])),
+                "counts": reconstruct_int_rle(
+                    rle_to_matrix(ann['segmentation']['counts'], ann['segmentation']['size'][1])),
                 "size": ann['segmentation']['size']
             }
         }

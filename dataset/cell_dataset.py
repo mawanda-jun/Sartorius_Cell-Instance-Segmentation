@@ -1,10 +1,12 @@
-from torch.utils.data import Dataset, DataLoader
-from PIL import Image
 import os
-from dataset import analyze_sample, collate_fn, remove_empty_masks, get_boxes_areas_from_masks
-from pycocotools.coco import COCO
-import torch
+
 import numpy as np
+import torch
+from PIL import Image
+from pycocotools.coco import COCO
+from torch.utils.data import Dataset, DataLoader
+
+from dataset import analyze_sample, collate_fn, remove_empty_masks, get_boxes_areas_from_masks
 
 
 class CellDataset(Dataset):
@@ -72,10 +74,10 @@ class CellDataset(Dataset):
 
         if self.transforms is not None:
             transformed = self.transforms(
-                    image=img,
-                    masks=masks,
-                    bboxes=boxes,
-                    bbox_classes=labels
+                image=img,
+                masks=masks,
+                bboxes=boxes,
+                bbox_classes=labels
             )
             img = transformed['image']
             masks = transformed['masks']
@@ -100,9 +102,8 @@ class CellDataset(Dataset):
 
 
 if __name__ == '__main__':
-    from tqdm import tqdm
-    import matplotlib.pyplot as plt
     from augmentations import get_augmentations
+
     trans = get_augmentations()
     # dataset = CellDataset('../data', '../data/train.json', transforms=trans)
     dataset = CellDataset('../data', 'train.json', transforms=trans)

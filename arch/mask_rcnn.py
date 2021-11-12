@@ -1,6 +1,7 @@
+from torchvision.models.detection import maskrcnn_resnet50_fpn
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
-from torchvision.models.detection import maskrcnn_resnet50_fpn
+
 from .base_network import BaseNetwork
 
 
@@ -26,11 +27,11 @@ class CellModel(BaseNetwork):
         in_features_mask = self.model.roi_heads.mask_predictor.conv5_mask.in_channels
         hidden_layer = 256
         # and replace the mask predictor with a new one
-        self.model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, opt['architecture']['num_classes'] + 1)
+        self.model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer,
+                                                                opt['architecture']['num_classes'] + 1)
 
         for param in self.model.parameters():
             param.requires_grad = True
 
     def forward(self, images, targets):
         return self.model(images, targets)
-
