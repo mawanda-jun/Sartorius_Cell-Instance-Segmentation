@@ -12,15 +12,16 @@ def remove_empty_masks(masks, labels):
     new_labels = []
     new_bboxes = []
     new_areas = []
-    for mask, label in zip(masks, labels):
-        if not mask.max() == 0:
-            bbox = get_boxes_from_mask(mask)
-            area = get_area_from_bbox(bbox)
-            if area > 0:
-                new_masks.append(mask)
-                new_labels.append(label)
-                new_bboxes.append(bbox)
-                new_areas.append(area)
+    if np.array(masks).any():
+        for mask, label in zip(masks, labels):
+            if mask.any():
+                bbox = get_boxes_from_mask(mask)
+                area = get_area_from_bbox(bbox)
+                if area > 0:
+                    new_masks.append(mask)
+                    new_labels.append(label)
+                    new_bboxes.append(bbox)
+                    new_areas.append(area)
     return new_masks, new_bboxes, new_areas, new_labels
 
 

@@ -52,7 +52,11 @@ class Trainer:
         shutil.copy('params.yml', os.path.join(self.save_dir, 'params.yml'))
 
         # Instantiate tensorboard
-        self._torch_board = TorchBoard(log_path=Path(os.path.join(self.save_dir, 'tensorboard')), **tensorboard_args)
+        self._torch_board = TorchBoard(
+            log_path=Path(os.path.join(self.save_dir, 'tensorboard')),
+            log_name="good-looking-name",
+            **tensorboard_args
+        )
 
     def save(self, epoch):
         # Clean folder from previous n checkpoints
@@ -98,16 +102,30 @@ class Trainer:
             # UPDATE PARAMS FOR ONE EPOCH
             self.arch.update_params(train_loader, self.optimizer)
             self.arch.validate(val_loader)
+
+            # Test model
+            if epoch % self.opt['training']['num_epoch_test'] == 0:
+                self.arch.test(val_loader)
+                self._torch_board.write_epoch_metrics(epoch=epoch,
+                                                      metrics={
+                                                          "mAP": self.arch.test_mAP
+                                                      },
+                                                      name="Metrics")
             # TRIGGER EPOCH LR SCHEDULER
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
 
             if epoch % self.opt['training']['save_step'] == 0:
                 self.save(epoch)
-            print(
-                f"Epoch {epoch}\t"
-                f"Loss/Val: {self.arch.epoch_loss:.4f}/{self.arch.val_epoch_loss:.4f}\t"
-                f"Mask loss/val:{self.arch.epoch_mask_loss:.4f}/{self.arch.val_epoch_mask_loss:.4f}")
+            printing_text = f"Epoch {epoch}\t"\
+                            f"Loss/Val: {self.arch.epoch_loss:.4f}/{self.arch.val_epoch_loss:.4f}\t"\
+                            f"Mask loss/val:{self.arch.epoch_mask_loss:.4f}/{self.arch.val_epoch_mask_loss:.4f}\t"
+            # Add mAP printing
+            if epoch % self.opt['training']['num_epoch_test'] == 0:
+                printing_text += f"mAP:{self.arch.test_mAP:.4f}"
+
+            print(printing_text)
+
             # Save to board
             self._torch_board.write_epoch_metrics(epoch=epoch,
                                                   metrics={
