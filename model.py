@@ -92,7 +92,7 @@ class Trainer:
         else:
             return 0
 
-    def fit(self, train_loader, val_loader):
+    def fit(self, train_loader, val_loader, test_loader):
         old_epoch = 0
         # Resume if autoresume is active
         if self.opt['training']['autoresume']:
@@ -105,7 +105,7 @@ class Trainer:
 
             # Test model
             if epoch % self.opt['test']['num_epoch_test'] == 0:
-                self.arch.test(val_loader)
+                self.arch.test(test_loader)
                 self._torch_board.write_epoch_metrics(epoch=epoch,
                                                       metrics={
                                                           "mAP": self.arch.test_mAP
@@ -121,7 +121,7 @@ class Trainer:
                             f"Loss/Val: {self.arch.epoch_loss:.4f}/{self.arch.val_epoch_loss:.4f}\t" \
                             f"Mask loss/val:{self.arch.epoch_mask_loss:.4f}/{self.arch.val_epoch_mask_loss:.4f}\t"
             # Add mAP printing
-            if epoch % self.opt['training']['num_epoch_test'] == 0:
+            if epoch % self.opt['test']['num_epoch_test'] == 0:
                 printing_text += f"mAP:{self.arch.test_mAP:.4f}"
 
             print(printing_text)

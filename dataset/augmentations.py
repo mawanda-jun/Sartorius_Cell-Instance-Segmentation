@@ -23,7 +23,7 @@ def get_augmentations(is_training=True):
     if is_training:
         transforms = [
             # A.RandomCrop(512, 512, always_apply=True),
-            # A.GaussNoise(),
+            A.GaussNoise(),
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5)
         ]

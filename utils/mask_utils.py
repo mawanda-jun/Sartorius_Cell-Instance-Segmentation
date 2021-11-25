@@ -39,8 +39,9 @@ def rle_encoding(x):
 
 def remove_overlapping_pixels(mask, other_masks):
     for other_mask in other_masks:
-        if np.sum(np.logical_and(mask, other_mask)) > 0:
-            mask[np.logical_and(mask, other_mask)] = 0
+        intersection = np.logical_and(other_mask, mask)
+        if intersection.any():
+            mask[intersection] = 0
     return mask
 
 

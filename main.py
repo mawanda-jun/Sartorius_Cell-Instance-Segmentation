@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 import os
 
 from dataset import CellDataset, collate_fn, get_augmentations, get_crop_augmentations
-from model import Trainer
+from model import Trainer, Tester
 from utils import fix_all_seeds
 
 
@@ -29,6 +29,11 @@ def main():
         coco_path=opt['data']['val_json'],
         transforms=get_augmentations(is_training=False)
     )
+    test_set = CellDataset(
+        data_dir=opt['data']['data_path'],
+        coco_path=opt['data']['val_json'],
+        is_test=True
+    )
 
     # Add crop augmentation if there is 4X mode
     if "4X" in opt['data']['train_json']:
@@ -49,7 +54,14 @@ def main():
         num_workers=opt['training']['num_workers'],
         collate_fn=collate_fn
     )
-    trainer.fit(train_loader, val_loader)
+    test_loader = DataLoader(
+        test_set,
+        batch_size=opt['test']['batch_size'],
+        shuffle=False,
+        num_workers=opt['test']['num_workers'],
+        collate_fn=collate_fn
+    )
+    trainer.fit(train_loader, val_loader, test_loader)
 
 
 def test(model_path):
@@ -67,17 +79,13 @@ def test(model_path):
     test_set = CellDataset(
         data_dir=opt['data']['data_path'],
         coco_path=opt['data']['val_json'],
-        transforms=get_augmentations(is_training=False)
+        is_test=True
     )
-
-    # Add crop augmentation if there is 4X mode
-    if "4X" in opt['data']['train_json']:
-        test_set.crop_transforms = get_crop_augmentations(is_training=False)
 
     test_loader = DataLoader(
         test_set,
         batch_size=opt['test']['batch_size'],
-        shuffle=opt['test']['shuffle'],
+        shuffle=True,
         num_workers=opt['test']['num_workers'],
         collate_fn=collate_fn
     )
@@ -85,5 +93,5 @@ def test(model_path):
 
 
 if __name__ == "__main__":
-    main()
-    # test('experiments/exp_6_4X_sgd_1e-2')
+    # main()
+    test('experiments/exp_6_4X_sgd_1e-2')

@@ -1,6 +1,24 @@
 import torch
 from tqdm import tqdm
 from metrics import iou_map, combine_masks, get_filtered_masks
+from dataset import ExactCrop, exact_reassemble, remove_empty_masks, reassemble_masks
+import numpy as np
+from PIL import Image
+
+
+def manage_crops(image, cropper):
+    # Crop big image
+    if isinstance(image, list):
+        # Working with masks
+        image = np.stack(image, -1)
+        image = image.astype(np.bool)
+    sample = cropper({'original': image})
+    image_crops = sample['original_slideshow'].squeeze()
+    arrangement = sample['arrangement']
+    pads = sample['pads']
+    stride = sample['stride']
+
+    return image_crops, arrangement, stride, pads
 
 
 class BaseNetwork(torch.nn.Module):
@@ -72,33 +90,63 @@ class BaseNetwork(torch.nn.Module):
         self.val_epoch_mask_loss = epoch_mask_loss / len(loader)
 
     def test(self, loader):
+        cropper = ExactCrop(crop_dim=self.opt['test']['crop_dim'], stride=384)
         self.model.eval()
         self.test_mAP = 0.0
         tqdm_loader = tqdm(loader)
         for images, targets in tqdm_loader:
-            # Images are already normalized inside mask rcnn network!!
-            images = [image.to(self.device).float() / 255. for image in images]
+            # Working at batch level
+            image_mAP = 0.0
+            for image, target in zip(images, targets):
+                # Working at image level: multiple masks per crop. Target crop masks are already combined.
+                image_crops, arrangement, stride, pads = manage_crops(image, cropper)
+                # masks_crops, _, _, _ = manage_crops(target['masks'], cropper)
+                # target_mask = reassemble_masks({
+                #     'original_slideshow': masks_crops,
+                #     'arrangement': arrangement,
+                #     'stride': stride,
+                #     'pads': pads
+                # })
+                image_crops = [torch.from_numpy(image).unsqueeze(0).to(self.device).float() / 255. for image in image_crops]
 
-            with torch.no_grad():
-                preds = self.model(images)
+                with torch.no_grad():
+                    preds = []
+                    for image_crop in image_crops:
+                        pred = self.model([image_crop])[0]
+                        pred['masks'] = get_filtered_masks(pred, self.opt)
+                        if len(pred['masks']) > 0:
+                            pred['masks'] = np.stack(pred['masks'], -1)
+                        else:
+                            pred['masks'] = np.zeros((image_crop.shape[1], image_crop.shape[2], 1), dtype=np.bool)
+                        pred.pop('boxes')
+                        try:
+                            pred['labels'] = int(torch.nanmean(pred['labels'].detach().cpu().float()).round().item())
+                        except ValueError:
+                            pred['labels'] = 2
+                        preds.append(pred)
 
-            # Check every image
-            batch_mAP = 0.0
-            for pred, target in zip(preds, targets):
-                mask = combine_masks(target['masks'], 0.5, images[0].shape[1], images[0].shape[2])
-                pred_labels = pred['labels'].cpu().numpy()
-                try:
-                    # All labels are equal per image, so we can just keep one label
-                    threshold = self.opt['data']['mask_threshold'][pred_labels[0]]
-                except IndexError:
-                    threshold = 0.5
-                pred_mask = combine_masks(get_filtered_masks(pred, self.opt), threshold, images[0].shape[1],
-                                          images[0].shape[2])
-                # Competition metric: average over the number of labels!
-                score = iou_map([mask], [pred_mask]) / len(target['labels'])
-                batch_mAP += score
+                threshold = self.opt['data']['mask_threshold'][int(np.round(np.mean([pred['labels'] for pred in preds])))]
+
+                pred_mask = reassemble_masks({
+                    'original_slideshow': [pred['masks'] for pred in preds],
+                    'arrangement': arrangement,
+                    'stride': stride,
+                    'pads': pads
+                })
+                pred_mask = [pred_mask[:, :, i] for i in range(pred_mask.shape[-1])]
+                pred_mask = combine_masks(pred_mask, threshold, pred_mask[0].shape[0], pred_mask[0].shape[1])
+
+                # Calculate score
+                # Combine masks from target
+                target_mask = combine_masks(target['masks'], 0.5, image.shape[0], image.shape[1])
+                # Calculate score
+                print(pred_mask.max(), target_mask.max())
+                score = iou_map([target_mask], [pred_mask])
+                print(score)
+                image_mAP += score
+
             # Average over number of images
-            self.test_mAP += (batch_mAP / len(images))
+            self.test_mAP += (image_mAP / len(images))
         # Average over batch
         self.test_mAP / len(loader)
 

@@ -10,9 +10,10 @@ from dataset import analyze_sample, collate_fn, remove_empty_masks, get_boxes_ar
 
 
 class CellDataset(Dataset):
-    def __init__(self, data_dir, coco_path, transforms=None):
+    def __init__(self, data_dir, coco_path, is_test=False, transforms=None, crop_transforms=None):
         self.transforms = transforms
-
+        self.crop_transforms = crop_transforms
+        self.is_test = is_test
         self.data_dir = data_dir
         self.coco = COCO(os.path.join(data_dir, coco_path))
         self.img_ids = self.coco.getImgIds()
@@ -83,10 +84,11 @@ class CellDataset(Dataset):
             masks = transformed['masks']
             boxes, areas = get_boxes_areas_from_masks(masks)
 
-        img = torch.tensor(img, dtype=torch.uint8).unsqueeze(0)
-        boxes = torch.tensor(boxes).float()
-        labels = torch.tensor(labels, dtype=torch.int64)
-        masks = torch.tensor(np.array(masks), dtype=torch.uint8)
+        if not self.is_test:
+            img = torch.tensor(img, dtype=torch.uint8).unsqueeze(0)
+            boxes = torch.tensor(boxes).float()
+            labels = torch.tensor(labels, dtype=torch.int64)
+            masks = torch.tensor(np.array(masks), dtype=torch.uint8)
 
         # Required target for the Mask R-CNN
         target = {
